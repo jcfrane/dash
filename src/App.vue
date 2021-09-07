@@ -1,15 +1,31 @@
 <template>
-  <img alt="Vue logo" src="./assets/logo.png">
-  <HelloWorld msg="Welcome to Your Vue.js App"/>
+  <h1>Welcome to dash!</h1>
+  <p>CPU Temperature: {{ cpuTemperature }}  &#x2103;</p>
+  <p>GPU Model: {{ gpuInfo.controllers[0].model }} </p>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import { ref } from 'vue'
+const electron = require('electron')
 
 export default {
   name: 'App',
-  components: {
-    HelloWorld
+  setup () {
+    const cpuTemperature = ref(null)
+    const gpuInfo = ref(null)
+
+    electron.ipcRenderer.on('gpu', (event, data) => {
+      console.log('gpu-event', event);
+      console.log('gpu-data', data)
+      gpuInfo.value = data
+    })
+
+    electron.ipcRenderer.on('cpu-temperature', (event, data) => {
+      console.log('cpu-temperature-event', event)
+      cpuTemperature.value = data.main
+    })
+
+    return { cpuTemperature, gpuInfo }
   }
 }
 </script>
